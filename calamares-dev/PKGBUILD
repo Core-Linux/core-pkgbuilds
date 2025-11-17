@@ -5,15 +5,16 @@
 # https://gitlab.manjaro.org/packages/extra/calamares-git/-/blob/master/PKGBUILD
 
 pkgname=calamares-eo
-pkgver=3.3.15.r51.gec9e8c5ce
-_commit=ec9e8c5ce6438d44df6fb6007452aeffa7e9fa1b
-pkgrel=2
+pkgver=3.4.1.r18.gc5c9b797d
+_commit=c5c9b797d56f61bc9979ec22851622a07ba328d8
+pkgrel=1
 pkgdesc='Distribution-independent installer framework'
 arch=('i686' 'x86_64')
 conflicts=('core-calamares')
-url="https://codeberg.org/m4teo/calamares"
+url="https://codeberg.org/Calamares/calamares"
 license=('GPL' 'LGPL')
 conflicts=('calamares')
+provides=('calamares')
 depends=(
   'boost-libs'
   'dmidecode'
@@ -55,15 +56,20 @@ makedepends=(
   'qt6-tools'
 )
 
-source=(git+https://codeberg.org/m4teo/calamares.git#commit=${_commit}
+source=(git+https://codeberg.org/Calamares/calamares.git#commit=${_commit}
   "calamares.desktop"
   "calamares_polkit"
-  "49-nopasswd-calamares.rules")
+  "49-nopasswd-calamares.rules"
+  "modules"
+)
 
-sha256sums=('SKIP'
+sha256sums=(
+  'SKIP'
   'SKIP'
   'c176b28007bd1c1f23d8dbb2c936fa54d0c01bacfb67290ddad597606c129df3'
-  '56d85ff6bf860b9559b8c9f997ad9b1002f3fccc782073760eca505e3bddd176')
+  '56d85ff6bf860b9559b8c9f997ad9b1002f3fccc782073760eca505e3bddd176'
+  'SKIP'
+)
 
 pkgver() {
   cd "$srcdir/calamares" || exit
@@ -99,7 +105,13 @@ pkgver() {
 }
 
 prepare() {
+
   cd ${srcdir}/calamares
+
+  # Copiar solo los módulos personalizados específicos
+  cp -rv "$startdir/modules/bootloader" "src/modules/"
+  cp -rv "$startdir/modules/postcfg" "src/modules/"
+
   sed -i -e 's/etc\/sddm.conf/etc\/sddm.conf.d\/kde_settings.conf/' src/modules/displaymanager/main.py
 
 }
