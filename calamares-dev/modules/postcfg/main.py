@@ -18,7 +18,6 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with Calamares. If not, see <http://www.gnu.org/licenses/>.
-#   new branch
 
 import libcalamares
 import subprocess
@@ -59,10 +58,6 @@ class ConfigController:
         if exists("/" + source):
             copytree("/" + source, join(self.root, target), symlinks=True, dirs_exist_ok=True)
 
-    def remove_pkg(self, pkg, path):
-        if exists(join(self.root, path)):
-            target_env_call(['pacman', '-R', '--noconfirm', pkg])
-
     def umount(self, mp):
         subprocess.call(["umount", "-l", join(self.root, mp)])
 
@@ -81,6 +76,7 @@ class ConfigController:
         return output[0].strip()
 
     def mark_orphans_as_explicit(self) -> None:
+
         """
         Mark all packages that pacman considers 'orphaned' as explicit.
 
@@ -89,6 +85,7 @@ class ConfigController:
         which causes 'pacman -Qdtq' to list even the entire graphical environment after installation.
 
         """
+
         libcalamares.utils.debug("Marking orphaned packages as explicit in the installed system...")
         libcalamares.utils.target_env_call([
             "sh", "-c",
@@ -97,38 +94,50 @@ class ConfigController:
         ])
         libcalamares.utils.debug("Package marking completed.")
 
+    # ---------------------------------------------------------
+    # MICROCODE FIX COMPLETO — COMPATIBLE CON MKINITCPIO
+    # ---------------------------------------------------------
+    def handle_ucode(self):
+        vendor = subprocess.getoutput(
+            "hwinfo --cpu | awk -F'\"' '/Vendor:/ {print $2; exit}'"
+        ).strip()
+
+        libcalamares.utils.debug(f"Detected CPU vendor: {vendor}")
+
+        if vendor == "AuthenticAMD":
+            libcalamares.utils.debug("Removing intel-ucode for AMD CPU.")
+            target_env_call(["pacman", "-R", "--noconfirm", "intel-ucode"])
+
+        elif vendor == "GenuineIntel":
+            libcalamares.utils.debug("Removing amd-ucode for Intel CPU.")
+            target_env_call(["pacman", "-R", "--noconfirm", "amd-ucode"])
+
+        else:
+            libcalamares.utils.debug("Unknown CPU vendor, skipping microcode removal.")
+
+        # Siempre regenerar initramfs con mkinitcpio
+        libcalamares.utils.debug("Regenerating initramfs with mkinitcpio -P ...")
+        target_env_call(["mkinitcpio", "-P"])
+        libcalamares.utils.debug("mkinitcpio completed.")
+
+    # ---------------------------------------------------------
+
     def run(self) -> None:
         self.init_keyring()
         self.populate_keyring()
 
-        # Remove unneeded ucode
-        cpu_ucode = subprocess.getoutput("hwinfo --cpu | awk -F'\"' '/Vendor:/ {print $2; exit}'")
-        if cpu_ucode == "AuthenticAMD":
-            self.remove_pkg("intel-ucode", "boot/intel-ucode.img")
-        elif cpu_ucode == "GenuineIntel":
-            self.remove_pkg("amd-ucode", "boot/amd-ucode.img")
-        else:
-            # Since no microcode packages were removed, dracut needs to be manually triggered
-            target_env_call(["mkinitcpio", "-P"])
+        # --- Microcode FIX ---
+        self.handle_ucode()
 
-        # Workaround for pacman-key bug
-        # FS#45351 https://bugs.archlinux.org/task/45351
-        # We have to kill gpg-agent because if it stays
-        # around we can't reliably unmount
-        # the target partition.
-        # Terminar proceso gpg-agent para evitar bloqueo de desmontaje
+        # Kill gpg-agent
         self.terminate('gpg-agent')
 
-        # Nueva acción: marcar huérfanos como explícitos
+        # Mark orphan packages
         self.mark_orphans_as_explicit()
-
 
         return None
 
 
 def run():
-    """ Misc postinstall configurations """
-
     config = ConfigController()
-
     return config.run()
