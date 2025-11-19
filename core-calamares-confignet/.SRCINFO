@@ -1,0 +1,15 @@
+pkgbase = core-calamares-confignet
+	pkgdesc = calamares config for archlinux plasma and gnome net
+	pkgver = 1.9
+	pkgrel = 10
+	url = https://github.com/sourcecorearch
+	arch = any
+	license = GPL3
+	makedepends = git
+	provides = core-calamares-confignet
+	options = !strip
+	options = !emptydirs
+	source = core-calamares-confignet::git+https://github.com/sourcecorearch/core-calamares-confignet
+	sha256sums = SKIP
+
+pkgname = core-calamares-confignet
