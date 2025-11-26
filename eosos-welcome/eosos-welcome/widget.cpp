@@ -31,8 +31,7 @@ Widget::~Widget()
 
 void Widget::on_pushButton_2_clicked()
 {
-    // QProcess::startDetached("calamares", {"-d"});
-    QProcess::startDetached("pkexec calamares");
+    QProcess::startDetached("/usr/bin/pkexec", {"--disable-internal-agent", "calamares"});
     close();
 }
 
