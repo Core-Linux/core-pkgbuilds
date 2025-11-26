@@ -1,0 +1,17 @@
+pkgbase = eosos-welcome
+	pkgdesc = Welcome window for EosOS Linux Live ISO
+	pkgver = 1.0
+	pkgrel = 1
+	arch = x86_64
+	license = GPL
+	makedepends = cmake
+	makedepends = ninja
+	makedepends = qt6-base
+	makedepends = qt6-tools
+	depends = qt6-base
+	source = eosos-welcome.tar.gz
+	source = eosos-welcome.desktop
+	sha256sums = SKIP
+	sha256sums = SKIP
+
+pkgname = eosos-welcome

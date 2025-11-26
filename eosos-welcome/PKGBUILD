@@ -1,0 +1,43 @@
+# Maintainer: TNE <TNE[at]EosOS[dot]org>
+
+pkgname=eosos-welcome
+pkgver=1.0
+pkgrel=1
+pkgdesc="Welcome window for EosOS Linux Live ISO"
+arch=('x86_64')
+license=('GPL')
+depends=('qt6-base')
+makedepends=('cmake' 'ninja' 'qt6-base' 'qt6-tools')
+source=(
+  "eosos-welcome.tar.gz"
+  "eosos-welcome.desktop"
+)
+sha256sums=(
+  'SKIP'
+  'SKIP'
+)
+
+build() {
+  cd "$srcdir/eosos-welcome"
+
+  cmake -B build -S . \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr
+
+  cmake --build build
+}
+
+package() {
+  cd "$srcdir/eosos-welcome/build"
+
+  # Instalar el binario compilado
+  install -Dm755 welcome "$pkgdir/usr/bin/eosos-welcome"
+
+  # Archivo .desktop para el menú
+  install -Dm644 "$srcdir/eosos-welcome.desktop" \
+    "$pkgdir/usr/share/applications/eosos-welcome.desktop"
+
+  # Autostart en KDE Plasma y otros entornos XDG
+  install -Dm644 "$srcdir/eosos-welcome.desktop" \
+    "$pkgdir/etc/xdg/autostart/eosos-welcome.desktop"
+}
