@@ -1,7 +1,7 @@
 pkgbase = calamares-eo
 	pkgdesc = Distribution-independent installer framework
 	pkgver = 3.4.1.r18.gc5c9b797d
-	pkgrel = 1
+	pkgrel = 2
 	url = https://codeberg.org/Calamares/calamares
 	arch = i686
 	arch = x86_64

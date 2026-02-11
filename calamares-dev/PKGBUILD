@@ -7,7 +7,7 @@
 pkgname=calamares-eo
 pkgver=3.4.1.r18.gc5c9b797d
 _commit=c5c9b797d56f61bc9979ec22851622a07ba328d8
-pkgrel=1
+pkgrel=2
 pkgdesc='Distribution-independent installer framework'
 arch=('i686' 'x86_64')
 conflicts=('core-calamares')
