@@ -12,5 +12,6 @@ source=("git+https://github.com/sourcecorearch/core-skel-kde.git")
 sha256sums=('SKIP')
 
 package() {
-  cp -r "${srcdir}/${pkgname}/src/etc/skel/"* "${pkgdir}/etc/skel/"
+  install -dm755 "${pkgdir}/etc/skel"
+  cp -a "${srcdir}/core-skel-kde/src/etc/skel/." "${pkgdir}/etc/skel/"
 }
