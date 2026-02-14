@@ -40,15 +40,15 @@ pkgver() {
   _file='CMakeLists.txt'
 
   _line=$(
-    grep -E "$_regex" "$_file" \
-      | head -1
+    grep -E "$_regex" "$_file" |
+      head -1
   )
   _version=$(
     printf '%s' "$_line" | sed -E "s@$_regex@\1@;s@alpha@a@;s@beta@b@;s@-@.@"
   )
   _line=$(
-    printf '%s' "$_line" \
-      | sed -E 's@\(@\\(@;s@\)@\\)@'
+    printf '%s' "$_line" |
+      sed -E 's@\(@\\(@;s@\)@\\)@'
   )
   _commit=$(
     git log -G "$_line" -1 --pretty=oneline --no-color | sed 's@\ .*$@@'
