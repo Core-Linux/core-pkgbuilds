@@ -18,55 +18,56 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with Calamares. If not, see <http://www.gnu.org/licenses/>.
+
 import libcalamares
 import subprocess
 from shutil import copy2, copytree
 from os.path import join, exists
-from os import rename, makedirs
 from libcalamares.utils import target_env_call, target_env_process_output
+
 
 class ConfigController:
     def __init__(self):
         self.__root = libcalamares.globalstorage.value("rootMountPoint")
         self.__keyrings = libcalamares.job.configuration.get('keyrings', [])
+
     @property
     def root(self):
         return self.__root
+
     @property
     def keyrings(self):
         return self.__keyrings
+
     def init_keyring(self):
         target_env_call(["pacman-key", "--init"])
+
     def populate_keyring(self):
         target_env_call(["pacman-key", "--populate"])
+
     def terminate(self, proc):
         target_env_call(['killall', '-9', proc])
+
     def copy_file(self, file):
         if exists("/" + file):
             copy2("/" + file, join(self.root, file))
+
     def copy_folder(self, source, target):
         if exists("/" + source):
-            copytree("/" + source, join(self.root, target), symlinks=True, dirs_exist_ok=True)
-    def umount(self, mp):
-        subprocess.call(["umount", "-l", join(self.root, mp)])
-    def mount(self, mp):
-        subprocess.call(["mount", "-B", "/" + mp, join(self.root, mp)])
-    def rmdir(self, dir):
-        subprocess.call(["rm", "-Rf", join(self.root, dir)])
-    def mkdir(self, dir):
-        subprocess.call(["mkdir", "-p", join(self.root, dir)])
+            copytree("/" + source, join(self.root, target),
+                     symlinks=True, dirs_exist_ok=True)
+
     def find_xdg_directory(self, user, type):
         output = []
-        target_env_process_output(["su", "-lT", user, "xdg-user-dir", type], output)
+        target_env_process_output(
+            ["su", "-lT", user, "xdg-user-dir", type], output
+        )
         return output[0].strip()
+
     def mark_orphans_as_explicit(self) -> None:
-        """
-        Mark all packages that pacman considers 'orphaned' as explicit.
-        This is necessary because in the live ISO (airootfs),
-        all packages are normally marked as dependencies (--asdeps),
-        which causes 'pacman -Qdtq' to list even the entire graphical environment after installation.
-        """
-        libcalamares.utils.debug("Marking orphaned packages as explicit in installed system...")
+        libcalamares.utils.debug(
+            "Marking orphaned packages as explicit in installed system..."
+        )
         target_env_call([
             "sh", "-c",
             "orphans=$(pacman -Qdtq); "
@@ -75,33 +76,49 @@ class ConfigController:
         libcalamares.utils.debug("Package marking completed.")
 
     # ---------------------------------------------------------
-    # MICROCODE FIX COMPLETO — COMPATIBLE CON MKINITCPIO
+    # MICROCODE FIX
     # ---------------------------------------------------------
     def handle_ucode(self):
         vendor = subprocess.getoutput(
-            "hwinfo --cpu | awk -F'\"' '/Vendor:/ {print $2; exit}'"
+            "grep -m1 vendor_id /proc/cpuinfo | awk '{print $3}'"
         ).strip()
+
         libcalamares.utils.debug(f"Detected CPU vendor: {vendor}")
+
         if vendor == "AuthenticAMD":
-            libcalamares.utils.debug("Removing intel-ucode for AMD CPU.")
-            target_env_call(["pacman", "-R", "--noconfirm", "intel-ucode"])
+            target_env_call([
+                "sh", "-c",
+                "pacman -Q intel-ucode && pacman -Rns --noconfirm intel-ucode || true"
+            ])
         elif vendor == "GenuineIntel":
-            libcalamares.utils.debug("Removing amd-ucode for Intel CPU.")
-            target_env_call(["pacman", "-R", "--noconfirm", "amd-ucode"])
-        else:
-            libcalamares.utils.debug("Unknown CPU vendor, skipping microcode removal.")
+            target_env_call([
+                "sh", "-c",
+                "pacman -Q amd-ucode && pacman -Rns --noconfirm amd-ucode || true"
+            ])
 
     # ---------------------------------------------------------
 
     def run(self) -> None:
         self.init_keyring()
         self.populate_keyring()
-        # --- Microcode FIX ---
+
+        # --- Microcode ---
         self.handle_ucode()
+
         # Kill gpg-agent
         self.terminate('gpg-agent')
+
         # Mark orphan packages
         self.mark_orphans_as_explicit()
+
+        # --- Snapper config (CORRECTO) ---
+        if exists(join(self.root, "usr/bin/snapper")):
+            target_env_call([
+                "snapper", "--no-dbus", "-c", "root", "create-config", "/"
+            ])
+            target_env_call(["systemctl", "enable", "snapper-timeline.timer"])
+            target_env_call(["systemctl", "enable", "snapper-cleanup.timer"])
+            target_env_call(["systemctl", "enable", "grub-btrfsd.service"])
 
         return None
 

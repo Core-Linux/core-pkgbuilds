@@ -28,7 +28,7 @@ import subprocess
 
 import libcalamares
 
-from libcalamares.utils import check_target_env_call
+from libcalamares.utils import check_target_env_call, check_target_env_output
 
 import gettext
 
@@ -389,7 +389,7 @@ def get_efi_suffix_generator(name):
     if name.count("${") > 1:
         raise ValueError("EFI ID {!r} contains multiple generators".format(name))
     import re
-    prefix, generator_name = re.match("(.*)\${([^}]*)}$", name).groups()
+    prefix, generator_name = re.match(r"(.*)\${([^}]*)}$", name).groups()
     if generator_name not in ("SERIAL", "RANDOM", "PHRASE"):
         raise ValueError("EFI suffix {!r} is unknown".format(generator_name))
 
@@ -578,6 +578,8 @@ def get_grub_efi_parameters():
         return "arm64-efi", "grubaa64.efi", "bootaa64.efi"
     elif efi_bitness == "64" and cpu_type == "loongarch64":
         return "loongarch64-efi", "grubloongarch64.efi", "bootloongarch64.efi"
+    elif efi_bitness == "64" and cpu_type == "riscv64":
+        return "riscv64-efi", "grubriscv64.efi", "bootriscv64.efi"
     elif efi_bitness == "64":
         # If it's not ARM, must by AMD64
         return "x86_64-efi", "grubx64.efi", "bootx64.efi"
@@ -717,193 +719,6 @@ def install_grub(efi_directory, fw_type):
         run_grub_install(fw_type, partitions, None)
 
     run_grub_mkconfig(partitions, libcalamares.job.configuration["grubCfg"])
-
-def add_additional_entries_limine(efi_directory, installation_root_path, fw_type):
-    """
-    Adds OS entries from osprober to Limine configuration.
-    
-    :param efi_directory: The path to the efi directory relative to the root
-    :param installation_root_path: The path to the root of the installation
-    :param fw_type: Type of system installation
-    """
-    osproberOutput = libcalamares.globalstorage.value("osproberLines")
-    if not osproberOutput:
-        return
-    partitions = libcalamares.globalstorage.value("partitions")
-    if not partitions:
-        libcalamares.utils.warning("No partitions available for osprober entries")
-        return
-        
-    config_path = os.path.join(installation_root_path + efi_directory, "limine.conf")
-    
-    try:
-        with open(config_path, 'a') as config_file:
-            config_file.write("/+Other systems and bootloaders\n")
-            
-            for line in osproberOutput:
-                if not line.strip() or line.count(":") < 3:
-                    continue
-                    
-                try:
-                    device, pretty_name, _, _ = line.split(":", 3)
-                    partition = device.split("@")
-                    
-                    if fw_type == "efi" and len(partition) == 2:
-                        devname, efi_path = partition
-                        partition_info = next(
-                            (p for p in partitions if p.get('device') == devname),
-                            None
-                        )
-                        if partition_info and 'partuuid' in partition_info:
-                            uuid = partition_info['partuuid']
-                            config_file.write(f"//{pretty_name}\n")
-                            config_file.write(f"\tprotocol: efi_chainload\n")
-                            config_file.write(f"\timage_path: guid({uuid}):{efi_path}\n")
-                            
-                    elif fw_type != "efi" and len(partition) == 1:
-                        devname = partition[0]
-                        drive, partition_number = get_partition_drive(devname)
-                        
-                        if drive != devname:
-                            drive_name = drive.replace("/dev/", "")
-                            diskseq_file = f"/sys/block/{drive_name}/diskseq"
-                            
-                            diskseq = ""
-                            try:
-                                if os.path.exists(diskseq_file):
-                                    with open(diskseq_file) as f:
-                                        diskseq = f.readline().strip()
-                            except (FileNotFoundError, OSError):
-                                pass
-                                
-                            config_file.write(f"//{pretty_name}\n")
-                            config_file.write(f"\tprotocol: bios_chainload\n")
-                            if diskseq:
-                                config_file.write(f"\tdrive: {diskseq}\n")
-                            config_file.write(f"\tpartition: {partition_number}\n")
-                            
-                except ValueError as e:
-                    libcalamares.utils.warning(f"Failed to parse osprober line '{line}': {e}")
-                    continue
-                    
-    except IOError as e:
-        libcalamares.utils.warning(f"Failed to write Limine additional entries: {e}")
-def update_limine_config(efi_directory, installation_root_path, fw_type):
-    """
-    Updates Limine configuration files.
-    
-    :param efi_directory: The path to the efi directory relative to the root
-    :param installation_root_path: The path to the root of the installation
-    :param fw_type: A string which is "efi" for UEFI installs. Any other value results in a BIOS install
-    """
-    config_path = os.path.join(
-        installation_root_path + efi_directory, "limine.conf"
-    )
-    limine_entry_config_path = os.path.join(
-        installation_root_path, "etc/default/limine"
-    )
-    try:
-        uuid = get_uuid()
-        kernel_params = " ".join(get_kernel_params(uuid))
-        # Write main Limine config
-        with open(config_path, "w") as config_file:
-            # Global settings
-            config_file.write("timeout: 5\n")
-            config_file.write("default_entry: 1\n")
-            if fw_type == "efi":
-                config_file.write("remember_last_entry: yes\n")
-            config_file.write("\n")
-            # Metadata (optional)
-            try:
-                machine_id = get_machine_id(installation_root_path)
-                config_file.write(f"# machine-id={machine_id}\n\n")
-            except (FileNotFoundError, OSError) as e:
-                libcalamares.utils.warning(f"Failed to get machine-id: {e}")
-                config_file.write(f"# machine-id=unknown\n\n")
-            # OS menu entry - maintaining EosOS as hardcoded
-            config_file.write("/+EosOS\n")
-        # Write Limine entry configuration
-        os.makedirs(os.path.dirname(limine_entry_config_path), exist_ok=True)
-        with open(limine_entry_config_path, "w") as limine_entry_config:
-            limine_entry_config.write(f'ESP_PATH="{efi_directory}"\n')
-            limine_entry_config.write(
-                f'KERNEL_CMDLINE[default]+="{kernel_params}"\n'
-            )
-            limine_entry_config.write('BOOT_ORDER="*"\n') 
-            
-    except (IOError, OSError) as e:
-        libcalamares.utils.warning(f"Failed to write Limine configuration: {e}")
-        raise
-def install_limine(efi_directory, fw_type):
-    """
-    Install Limine as bootloader (EFI or BIOS) in a neutral way.
-    
-    :param efi_directory: The path to the efi directory relative to the root
-    :param fw_type: A string which is "efi" for UEFI installs. Any other value results in a BIOS install
-    """
-    partitions = libcalamares.globalstorage.value("partitions")
-    if not partitions:
-        libcalamares.utils.warning(
-            _("Failed to install Limine: no partitions defined")
-        )
-        return
-    installation_root_path = libcalamares.globalstorage.value("rootMountPoint")
-    if not installation_root_path:
-        libcalamares.utils.warning(_("Failed to install Limine: root mount point not found"))
-        return
-        
-    install_efi_directory = installation_root_path + efi_directory
-    try:
-        os.makedirs(install_efi_directory, exist_ok=True)
-        # Update configuration first
-        update_limine_config(efi_directory, installation_root_path, fw_type)
-        
-        # Add additional entries
-        add_additional_entries_limine(efi_directory, installation_root_path, fw_type)
-        # Install based on firmware type
-        if fw_type == "efi":
-            libcalamares.utils.debug("Bootloader: limine (EFI)")
-            
-            # Verificar que el archivo EFI exista
-            efi_source = os.path.join(installation_root_path, "usr/share/limine/BOOTX64.EFI")
-            if not os.path.exists(efi_source):
-                libcalamares.utils.warning("Limine EFI file not found")
-                return
-                
-            # Copiar archivo EFI
-            efi_boot_dir = os.path.join(install_efi_directory, "EFI", "arch-limine")
-            os.makedirs(efi_boot_dir, exist_ok=True)
-            shutil.copy2(efi_source, os.path.join(efi_boot_dir, "BOOTX64.EFI"))
-            
-            # Ejecutar instalación EFI con parámetros
-            result = target_env_call(["/usr/bin/limine-install", "--efi"])
-            if result != 0:
-                libcalamares.utils.warning(_("Limine EFI installation failed with code {}").format(result))
-                return
-        else:
-            libcalamares.utils.debug("Bootloader: limine (BIOS)")
-            boot_loader = libcalamares.globalstorage.value("bootLoader")
-            if not boot_loader or boot_loader.get("installPath") is None:
-                libcalamares.utils.warning(_("Failed to install Limine: no bootloader install path"))
-                return
-            bios_sys_source = os.path.join(
-                installation_root_path,
-                "usr/share/limine/limine-bios.sys"
-            )
-            
-            if os.path.exists(bios_sys_source):
-                shutil.copy2(bios_sys_source, install_efi_directory)
-            else:
-                libcalamares.utils.warning(_("Limine BIOS system file not found"))
-                return
-            drive, partition_num = get_partition_drive(boot_loader["installPath"])
-            if drive and drive != boot_loader["installPath"]:
-                check_target_env_call(["limine", "bios-install", drive])
-            else:
-                libcalamares.utils.warning(_("Failed to determine Limine BIOS installation drive"))
-                
-    except (IOError, OSError, subprocess.CalledProcessError) as e:
-        libcalamares.utils.warning(_("Limine installation error: {}").format(str(e)))
 
 
 def install_secureboot(efi_directory):

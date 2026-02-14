@@ -1,60 +1,21 @@
 # Maintainer: TNE <TNE[at]EosOS[dot]org>
 # Contributor: Philip Müller <philm[at]manjaro[dog]org>
-# https://gitlab.manjaro.org/manjaro-arm/packages/extra/calamares/-/blob/master/PKGBUILD
-# https://gitlab.manjaro.org/packages/extra/calamares/-/blob/master/PKGBUILD
-# https://gitlab.manjaro.org/packages/extra/calamares-git/-/blob/master/PKGBUILD
 
 pkgname=calamares-eo
-pkgver=3.4.1.r18.gc5c9b797d
-_commit=c5c9b797d56f61bc9979ec22851622a07ba328d8
+pkgver=3.4.1.r26.g3f6cd831f
+_commit=3f6cd831f5e71eb3b0e1e8b60d0afe1ec989eff1
 pkgrel=2
 pkgdesc='Distribution-independent installer framework'
 arch=('i686' 'x86_64')
-conflicts=('core-calamares')
-url="https://codeberg.org/Calamares/calamares"
-license=('GPL' 'LGPL')
-conflicts=('calamares')
-provides=('calamares')
-depends=(
-  'boost-libs'
-  'dmidecode'
-  'gptfdisk'
-  'hwinfo'
-  'ckbcomp'
-  'kconfig'
-  'kcoreaddons'
-  'kcrash'
-  'kiconthemes'
-  'ki18n'
-  'kparts'
-  'kpmcore'
-  'kservice'
-  'kwidgetsaddons'
-  'mkinitcpio-openswap'
-  'networkmanager'
-  'polkit-qt6'
-  'python'
-  'python-distutils-extra'
-  'qt6-base'
-  'qt6-declarative'
-  'qt6-svg'
-  'rsync'
-  'solid'
-  'squashfs-tools'
-  'yaml-cpp'
-)
-makedepends=(
-  'boost'
-  'cmake'
-  'doxygen'
-  'extra-cmake-modules'
-  'git'
-  'ninja'
-  'python-jsonschema'
-  'python-pyaml'
-  'python-unidecode'
-  'qt6-tools'
-)
+url="https://calamares.codeberg.page"
+license=('LGPL')
+conflicts=('calamares' 'calamares-dev')
+provides=('calamares' 'calamares-dev')
+replaces=('calamares-dev')
+depends=('kconfig' 'kcoreaddons' 'kiconthemes' 'ki18n' 'solid' 'yaml-cpp' 'kpmcore'
+  'boost-libs' 'ckbcomp' 'hwinfo' 'qt6-svg' 'polkit-qt6'
+  'squashfs-tools' 'libpwquality' 'python' 'python-distutils-extra')
+makedepends=('extra-cmake-modules' 'qt6-tools' 'qt6-translations' 'git' 'boost')
 
 source=(
   git+https://codeberg.org/Calamares/calamares.git#commit=${_commit}
@@ -79,15 +40,15 @@ pkgver() {
   _file='CMakeLists.txt'
 
   _line=$(
-    grep -E "$_regex" "$_file" |
-      head -1
+    grep -E "$_regex" "$_file" \
+      | head -1
   )
   _version=$(
     printf '%s' "$_line" | sed -E "s@$_regex@\1@;s@alpha@a@;s@beta@b@;s@-@.@"
   )
   _line=$(
-    printf '%s' "$_line" |
-      sed -E 's@\(@\\(@;s@\)@\\)@'
+    printf '%s' "$_line" \
+      | sed -E 's@\(@\\(@;s@\)@\\)@'
   )
   _commit=$(
     git log -G "$_line" -1 --pretty=oneline --no-color | sed 's@\ .*$@@'
@@ -106,19 +67,12 @@ pkgver() {
 }
 
 prepare() {
-
   cd ${srcdir}/calamares
-
-  # Copiar solo los módulos personalizados específicos
-  # cp -rv "$startdir/modules/bootloader" "src/modules/"
-  # cp -rv "$startdir/modules/postcfg" "src/modules/"
 
   cp -rv "${srcdir}/core-pkgbuilds/calamares-dev/modules/bootloader" src/modules/
   cp -rv "${srcdir}/core-pkgbuilds/calamares-dev/modules/postcfg" src/modules/
 
-
   sed -i -e 's/etc\/sddm.conf/etc\/sddm.conf.d\/kde_settings.conf/' src/modules/displaymanager/main.py
-
 }
 
 build() {
