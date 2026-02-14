@@ -7,7 +7,7 @@ pkgdesc="Core skel configuration for KDE Plasma live session"
 arch=('any')
 url="https://github.com/sourcecorearch/core-skel-kde"
 license=('GPL3')
-depends=('plasma-workspace')
+depends=()
 source=("git+https://github.com/sourcecorearch/core-skel-kde.git")
 sha256sums=('SKIP')
 
