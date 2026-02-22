@@ -1,4 +1,4 @@
-pkgbase = calamares-eo
+pkgbase = calamares-core
 	pkgdesc = Distribution-independent installer framework
 	pkgver = 3.4.1.r26.g3f6cd831f
 	pkgrel = 2
@@ -33,7 +33,7 @@ pkgbase = calamares-eo
 	conflicts = calamares-dev
 	replaces = calamares-dev
 	source = git+https://codeberg.org/Calamares/calamares.git#commit=3f6cd831f5e71eb3b0e1e8b60d0afe1ec989eff1
-	source = git+https://github.com/sourcecorearch/core-pkgbuilds.git
+	source = git+https://github.com/Core-Linux/core-pkgbuilds.git
 	source = calamares.desktop
 	source = calamares_polkit
 	source = 49-nopasswd-calamares.rules
@@ -43,4 +43,4 @@ pkgbase = calamares-eo
 	sha256sums = c176b28007bd1c1f23d8dbb2c936fa54d0c01bacfb67290ddad597606c129df3
 	sha256sums = 56d85ff6bf860b9559b8c9f997ad9b1002f3fccc782073760eca505e3bddd176
 
-pkgname = calamares-eo
+pkgname = calamares-core
