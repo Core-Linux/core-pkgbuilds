@@ -68,6 +68,7 @@ class ConfigController:
         libcalamares.utils.debug(
             "Marking orphaned packages as explicit in installed system..."
         )
+        target_env_call(["sh", "-c", "pacman-db-upgrade"])
         target_env_call([
             "sh", "-c",
             "orphans=$(pacman -Qdtq); "
@@ -75,9 +76,6 @@ class ConfigController:
         ])
         libcalamares.utils.debug("Package marking completed.")
 
-    # ---------------------------------------------------------
-    # MICROCODE FIX
-    # ---------------------------------------------------------
     def handle_ucode(self):
         vendor = subprocess.getoutput(
             "grep -m1 vendor_id /proc/cpuinfo | awk '{print $3}'"
@@ -96,7 +94,6 @@ class ConfigController:
                 "pacman -Q amd-ucode && pacman -Rns --noconfirm amd-ucode || true"
             ])
 
-    # ---------------------------------------------------------
 
     def run(self) -> None:
         self.init_keyring()
@@ -111,7 +108,7 @@ class ConfigController:
         # Mark orphan packages
         self.mark_orphans_as_explicit()
 
-        # --- Snapper config (CORRECTO) ---
+        # --- Snapper config ---
         if exists(join(self.root, "usr/bin/snapper")):
             target_env_call([
                 "snapper", "--no-dbus", "-c", "root", "create-config", "/"

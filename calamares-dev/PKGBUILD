@@ -1,7 +1,11 @@
 # Maintainer: TNE <TNE[at]EosOS[dot]org>
 # Contributor: Philip Müller <philm[at]manjaro[dog]org>
 
+<<<<<<< Updated upstream
 pkgname=calamares-eo
+=======
+pkgname=calamares-core
+>>>>>>> Stashed changes
 pkgver=3.4.1.r26.g3f6cd831f
 _commit=3f6cd831f5e71eb3b0e1e8b60d0afe1ec989eff1
 pkgrel=2
@@ -97,7 +101,7 @@ build() {
 package() {
   cd ${srcdir}/calamares/build
   DESTDIR="${pkgdir}" cmake --build . --target install
-  install -Dm644 "${srcdir}/calamares.desktop" "$pkgdir/etc/xdg/autostart/calamares.desktop"
+  # install -Dm644 "${srcdir}/calamares.desktop" "$pkgdir/etc/xdg/autostart/calamares.desktop"
   install -Dm755 "${srcdir}/calamares_polkit" "$pkgdir/usr/bin/calamares_polkit"
   install -Dm644 "${srcdir}/49-nopasswd-calamares.rules" "$pkgdir/etc/polkit-1/rules.d/49-nopasswd-calamares.rules"
   chmod 750 "$pkgdir/etc/polkit-1/rules.d"
