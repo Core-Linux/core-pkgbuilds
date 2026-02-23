@@ -68,7 +68,6 @@ class ConfigController:
         libcalamares.utils.debug(
             "Marking orphaned packages as explicit in installed system..."
         )
-        target_env_call(["sh", "-c", "pacman-db-upgrade"])
         target_env_call([
             "sh", "-c",
             "orphans=$(pacman -Qdtq); "
@@ -76,6 +75,9 @@ class ConfigController:
         ])
         libcalamares.utils.debug("Package marking completed.")
 
+    # ---------------------------------------------------------
+    # MICROCODE FIX
+    # ---------------------------------------------------------
     def handle_ucode(self):
         vendor = subprocess.getoutput(
             "grep -m1 vendor_id /proc/cpuinfo | awk '{print $3}'"
@@ -94,7 +96,24 @@ class ConfigController:
                 "pacman -Q amd-ucode && pacman -Rns --noconfirm amd-ucode || true"
             ])
 
+    # ---------------------------------------------------------
+    # BTRFS DETECTION
+    # ---------------------------------------------------------
+    def is_btrfs_root(self) -> bool:
+        partitions = libcalamares.globalstorage.value("partitions")
 
+        if not partitions:
+            return False
+
+        for partition in partitions:
+            if partition.get("mountPoint") == "/":
+                return partition.get("fs") == "btrfs"
+
+        return False
+
+    # ---------------------------------------------------------
+    # MAIN RUN
+    # ---------------------------------------------------------
     def run(self) -> None:
         self.init_keyring()
         self.populate_keyring()
@@ -109,13 +128,27 @@ class ConfigController:
         self.mark_orphans_as_explicit()
 
         # --- Snapper config ---
-        if exists(join(self.root, "usr/bin/snapper")):
+        if self.is_btrfs_root():
+            libcalamares.utils.debug("Btrfs detected. Configuring Snapper...")
+
+            if exists(join(self.root, "usr/bin/snapper")):
+                target_env_call(["mkdir", "-p", "/.snapshots"])
+                target_env_call([
+                    "snapper", "--no-dbus", "-c", "root", "create-config", "/"
+                ])
+                target_env_call(["systemctl", "enable", "snapper-timeline.timer"])
+                target_env_call(["systemctl", "enable", "snapper-cleanup.timer"])
+
+                if exists(join(self.root, "usr/bin/grub-btrfsd")):
+                    target_env_call(["systemctl", "enable", "grub-btrfsd.service"])
+        else:
+            libcalamares.utils.debug(
+                "Non-Btrfs filesystem detected. Removing Snapper stack..."
+            )
             target_env_call([
-                "snapper", "--no-dbus", "-c", "root", "create-config", "/"
+                "sh", "-c",
+                "pacman -Rns --noconfirm snapper snap-pac grub-btrfs inotify-tools 2>/dev/null || true"
             ])
-            target_env_call(["systemctl", "enable", "snapper-timeline.timer"])
-            target_env_call(["systemctl", "enable", "snapper-cleanup.timer"])
-            target_env_call(["systemctl", "enable", "grub-btrfsd.service"])
 
         return None
 
