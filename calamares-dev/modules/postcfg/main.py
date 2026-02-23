@@ -132,7 +132,6 @@ class ConfigController:
             libcalamares.utils.debug("Btrfs detected. Configuring Snapper...")
 
             if exists(join(self.root, "usr/bin/snapper")):
-                target_env_call(["mkdir", "-p", "/.snapshots"])
                 target_env_call([
                     "snapper", "--no-dbus", "-c", "root", "create-config", "/"
                 ])
