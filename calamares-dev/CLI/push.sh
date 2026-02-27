@@ -1,38 +1,29 @@
 #!/bin/bash
 set -e
 
-echo "📂 Cambios detectados:"
-echo
-
 files=$(git diff --name-only)
 
-if [ -z "$files" ]; then
-  echo "✔ No hay cambios"
-  exit 0
-fi
+icons=""
 
-echo "$files" | while read -r f; do
+for f in $files; do
   case "$f" in
-  PKGBUILD | .SRCINFO) icon="📦" ;;
-  *.rs) icon="🦀" ;;
-  *.svg) icon="🎨" ;;
-  *.png) icon="🖼" ;;
-  *.desktop) icon="🖥" ;;
-  meson.build) icon="⚙" ;;
-  *.patch) icon="🔧" ;;
-  *.sh) icon="🔧" ;;
-  *) icon="📄" ;;
+  PKGBUILD | .SRCINFO) icons="${icons}📦" ;;
+  *.rs) icons="${icons}🦀" ;;
+  *.desktop) icons="${icons}🖥" ;;
+  *.png | *.svg) icons="${icons}🎨" ;;
+  *.sh) icons="${icons}🧩" ;;
   esac
-
-  echo "$icon $f"
 done
 
+echo "📂 Cambios:"
+echo "$files"
 echo
+
 echo "✏️ Commit:"
 read -r msg
 
 git add -A
-git commit -m "$msg"
+git commit -m "$icons $msg"
 git push
 
 echo
