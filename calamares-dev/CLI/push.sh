@@ -1,20 +1,39 @@
 #!/bin/bash
 set -e
 
-echo "📦 Añadiendo cambios..."
-git add .
+echo "📂 Cambios detectados:"
+echo
 
-if [ -z "$1" ]; then
-  echo "✏️  Mensaje del commit:"
-  read -r msg
-else
-  msg="$*"
+files=$(git diff --name-only)
+
+if [ -z "$files" ]; then
+  echo "✔ No hay cambios"
+  exit 0
 fi
 
-echo "📝 Commit: $msg"
-git commit -m "$msg"
+echo "$files" | while read -r f; do
+  case "$f" in
+  PKGBUILD | .SRCINFO) icon="📦" ;;
+  *.rs) icon="🦀" ;;
+  *.svg) icon="🎨" ;;
+  *.png) icon="🖼" ;;
+  *.desktop) icon="🖥" ;;
+  meson.build) icon="⚙" ;;
+  *.patch) icon="🔧" ;;
+  *.sh) icon="🔧" ;;
+  *) icon="📄" ;;
+  esac
 
-echo "🚀 Enviando a GitHub..."
+  echo "$icon $f"
+done
+
+echo
+echo "✏️ Commit:"
+read -r msg
+
+git add -A
+git commit -m "$msg"
 git push
 
-echo "✅ Listo"
+echo
+echo "✅ Done"
