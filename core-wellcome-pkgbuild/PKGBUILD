@@ -22,6 +22,8 @@ makedepends=(
   lld
   llvm
   meson
+  ninja
+  glib2
 )
 # source=("${pkgname}::git+$url.git#tag=v${pkgver}?signed"
 source=("${pkgname}::git+$url.git#branch=main"

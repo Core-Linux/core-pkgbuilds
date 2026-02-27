@@ -1,0 +1,26 @@
+pkgbase = core-wellcome
+	pkgdesc = Welcome screen for Core
+	pkgver = 0.19.2
+	pkgrel = 1
+	url = https://github.com/archlatam/core-wellcome-dev
+	arch = x86_64
+	license = GPL-3.0-or-later
+	makedepends = cargo
+	makedepends = clang
+	makedepends = git
+	makedepends = lld
+	makedepends = llvm
+	makedepends = meson
+	makedepends = ninja
+	makedepends = glib2
+	depends = glib2
+	depends = gtk3
+	depends = pciutils
+	depends = procps-ng
+	source = core-wellcome::git+https://github.com/archlatam/core-wellcome-dev.git#branch=main
+	source = 0001-deps-use-latest-alpm-crate-commit.patch
+	validpgpkeys = B1B70BB1CD56047DEF31DE2EB62C3D10C54D5DA9
+	sha512sums = SKIP
+	sha512sums = f29eed07769eaee51c21cf8ed2144dcad9b5815ae0ab1ade1524a20cffc597c37f824abff6d6eb26307851e652c55f41270a59005093367197692b34bb650ec3
+
+pkgname = core-wellcome
