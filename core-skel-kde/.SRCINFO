@@ -1,12 +1,11 @@
 pkgbase = core-skel-kde
-pkgdesc = Core skel configuration for KDE Plasma live session
-pkgver = 1.0
-pkgrel = 1
-url = https://github.com/sourcecorearch/core-skel-kde
-arch = any
-license = GPL3
-depends = plasma-workspace
-source = git+https://github.com/sourcecorearch/core-skel-kde.git
-sha256sums = SKIP
+	pkgdesc = Core skel configuration for KDE Plasma live session
+	pkgver = 1.0
+	pkgrel = 1
+	url = https://github.com/Core-Linux/core-skel-kde
+	arch = any
+	license = GPL3
+	source = git+https://github.com/Core-Linux/core-skel-kde.git
+	sha256sums = SKIP
 
 pkgname = core-skel-kde

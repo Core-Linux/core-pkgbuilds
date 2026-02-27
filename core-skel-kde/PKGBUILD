@@ -1,14 +1,14 @@
-# Maintainer: EosOS GNU/linux <eososlinux@gmail.com>
+# Maintainer: Core GNU/linux <sourcecorearh@gmail.com>
 
 pkgname=core-skel-kde
 pkgver=1.0
 pkgrel=1
 pkgdesc="Core skel configuration for KDE Plasma live session"
 arch=('any')
-url="https://github.com/sourcecorearch/core-skel-kde"
+url="https://github.com/Core-Linux/core-skel-kde"
 license=('GPL3')
 depends=()
-source=("git+https://github.com/sourcecorearch/core-skel-kde.git")
+source=("git+https://github.com/Core-Linux/core-skel-kde.git")
 sha256sums=('SKIP')
 
 package() {
