@@ -1,23 +1,35 @@
 # Maintainer: m4teo.dev <m4teo.dev>
 
 pkgname=core-icons
-pkgdesc="Base icons for EosOS Linux"
-pkgver=r5.6f56435
+pkgdesc="Base icons for Core Linux"
+pkgver=r8.278d744
 pkgrel=1
 arch=('any')
-url="https://github.com/sourcecorearch/core-icons"
+url="https://github.com/Core-Linux/core-icons"
 license=('GPL')
 makedepends=('git')
+depends=('hicolor-icon-theme')
 source=("$pkgname::git+$url.git")
 sha256sums=('SKIP')
 
 pkgver() {
-	cd "$srcdir/$pkgname" || exit
-	printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+  cd "$srcdir/$pkgname" || exit
+  printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
 }
 
 package() {
-	install -d "$pkgdir/usr"
-	cp -rf "$srcdir/$pkgname/usr" "$pkgdir"
-}
 
+  # SVG → estándar Freedesktop
+  install -d "$pkgdir/usr/share/icons/hicolor/scalable/apps"
+
+  install -m644 \
+    "$srcdir/$pkgname/usr/share/icons/"*.svg \
+    "$pkgdir/usr/share/icons/hicolor/scalable/apps/"
+
+  # PNG → ruta original del proyecto
+  install -d "$pkgdir/usr/share/icons"
+
+  install -m644 \
+    "$srcdir/$pkgname/usr/share/icons/corelinux.png" \
+    "$pkgdir/usr/share/icons/corelinux.png"
+}

@@ -1,0 +1,13 @@
+pkgbase = core-icons
+	pkgdesc = Base icons for Core Linux
+	pkgver = r8.278d744
+	pkgrel = 1
+	url = https://github.com/Core-Linux/core-icons
+	arch = any
+	license = GPL
+	makedepends = git
+	depends = hicolor-icon-theme
+	source = core-icons::git+https://github.com/Core-Linux/core-icons.git
+	sha256sums = SKIP
+
+pkgname = core-icons
