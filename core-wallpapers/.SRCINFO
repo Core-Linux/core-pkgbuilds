@@ -1,0 +1,12 @@
+pkgbase = core-wallpapers
+	pkgdesc = Core default wallpaper
+	pkgver = r7.5729630
+	pkgrel = 4
+	url = https://github.com/Core-Linux/core-wallpapers
+	arch = any
+	license = GPLv3
+	makedepends = git
+	source = git+https://github.com/Core-Linux/core-wallpapers.git
+	sha256sums = SKIP
+
+pkgname = core-wallpapers

@@ -2,22 +2,22 @@
 
 pkgname=core-wallpapers
 pkgver=r7.5729630
-pkgrel=3
-pkgdesc="EosOS default wallpaper"
+pkgrel=4
+pkgdesc="Core default wallpaper"
 arch=('any')
-url="https://github.com/sourcecorearch/$pkgname"
+url="https://github.com/Core-Linux/$pkgname"
 license=('GPLv3')
 makedepends=('git')
-source=("git+https://github.com/sourcecorearch/$pkgname.git")
+source=("git+https://github.com/Core-Linux/$pkgname.git")
 sha256sums=('SKIP')
 
 pkgver() {
-	cd "$srcdir/$pkgname" || exit
-	printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+  cd "$srcdir/$pkgname" || exit
+  printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
 }
 
 package() {
-	cd "${pkgname}" || exit
-	install -d "${pkgdir}/usr/share/wallpapers/${pkgname}"
-	cp "${srcdir}/${pkgname}/src/${pkgname}"/* "${pkgdir}/usr/share/wallpapers/${pkgname}"
+  cd "${pkgname}" || exit
+  install -d "${pkgdir}/usr/share/wallpapers/${pkgname}"
+  cp "${srcdir}/${pkgname}/src/${pkgname}"/* "${pkgdir}/usr/share/wallpapers/${pkgname}"
 }
