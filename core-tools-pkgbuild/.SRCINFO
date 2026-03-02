@@ -1,0 +1,16 @@
+pkgbase = core-tools
+	pkgdesc = Core Linux system tools
+	pkgver = 0.1.0
+	pkgrel = 1
+	url = https://github.com/archlatam/core-tools-dev
+	arch = x86_64
+	license = GPL-3.0-or-later
+	makedepends = rust
+	makedepends = cargo
+	makedepends = pkgconf
+	depends = gtk3
+	depends = glib2
+	source = core-tools::git+https://github.com/archlatam/core-tools-dev.git#branch=main
+	sha256sums = SKIP
+
+pkgname = core-tools

@@ -1,0 +1,44 @@
+# Maintainer: Jose Dragic
+
+pkgname=core-tools
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Core Linux system tools"
+arch=('x86_64')
+url="https://github.com/archlatam/core-tools-dev"
+license=('GPL-3.0-or-later')
+
+depends=(
+  gtk3
+  glib2
+)
+
+makedepends=(
+  rust
+  cargo
+  pkgconf
+)
+
+source=("${pkgname}::git+$url.git#branch=main")
+sha256sums=('SKIP')
+
+build() {
+  cd "$srcdir/$pkgname"
+  cargo build --release --locked
+}
+
+package() {
+  cd "$srcdir/$pkgname"
+
+  # instalar binario
+  install -Dm755 "target/release/core-tools" \
+    "$pkgdir/usr/bin/core-tools"
+
+  # instalar desktop
+  install -Dm644 core-tools.desktop \
+    "$pkgdir/usr/share/applications/core-tools.desktop"
+
+  # instalar icono
+  install -Dm644 icons/core-tools.svg \
+    "$pkgdir/usr/share/icons/hicolor/scalable/apps/core-tools.svg"
+}
