@@ -3,7 +3,7 @@
 
 pkgname=core-wellcome
 _pkgname=core-welcome
-pkgver=0.19.2
+pkgver=0.19.3
 pkgrel=1
 pkgdesc='Welcome screen for Core'
 arch=('x86_64')
