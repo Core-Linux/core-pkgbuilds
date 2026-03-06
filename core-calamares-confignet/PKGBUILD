@@ -2,7 +2,7 @@
 
 pkgname=core-calamares-confignet
 _destname1="/etc"
-pkgver=2.0
+pkgver=2.1
 pkgrel=1
 pkgdesc="calamares config for archlinux plasma and gnome net"
 arch=('any')
