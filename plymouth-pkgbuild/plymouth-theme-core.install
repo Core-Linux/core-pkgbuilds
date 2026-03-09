@@ -1,4 +1,4 @@
-name="garuda"
+name="core"
 
 post_install() {
 	echo "Set plymouth theme $name"
