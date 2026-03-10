@@ -6,13 +6,14 @@ pkgver=2.1
 pkgrel=1
 pkgdesc="calamares config for archlinux plasma and gnome net"
 arch=('any')
-url="https://github.com/Core-Linux/core-calamares-confignet"
+url="https://github.com/Core-Linux/core-calamares-confignet.git"
 license=('GPL3')
 makedepends=('git')
 depends=()
 provides=("${pkgname}")
 options=(!strip !emptydirs)
-source=(${pkgname}::"git+${url}/${pkgname}")
+
+source=(${pkgname}::"git+${url}")
 sha256sums=('SKIP')
 
 package() {
