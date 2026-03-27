@@ -112,20 +112,55 @@ class ConfigController:
         return False
 
     # ---------------------------------------------------------
+    # DETECCIÓN DE BIOS / UEFI
+    # ---------------------------------------------------------
+    def is_bios(self) -> bool:
+        """ Retorna True si el sistema es BIOS Legacy, False si es UEFI """
+        return not exists("/sys/firmware/efi")
+
+    # ---------------------------------------------------------
+    # LIMINE FIX (Solo para BIOS)
+    # ---------------------------------------------------------
+    def fix_limine(self):
+        # Solo ejecutar si es BIOS Legacy
+        if self.is_bios():
+            libcalamares.utils.debug("Sistema BIOS detectado. Aplicando fix de Limine...")
+            
+            # 1. Eliminar el antiguo
+            target_env_call([
+                "sh", "-c",
+                "pacman -R --noconfirm limine-entry-tool || true"
+            ])
+
+            # 2. Instalar el hook con elección automática de proveedor (Java)
+            target_env_call([
+                "sh", "-c",
+                "echo 1 | pacman -S --noconfirm --needed limine-mkinitcpio-hook"
+            ])
+            
+            # 3. Regenerar initramfs para disparar la creación del limine.conf
+            libcalamares.utils.debug("Generando archivos de arranque para BIOS...")
+            target_env_call(["mkinitcpio", "-P"])
+        else:
+            libcalamares.utils.debug("Sistema UEFI detectado. Saltando fix de Limine BIOS.")
+
+    # ---------------------------------------------------------
     # MAIN RUN
     # ---------------------------------------------------------
     def run(self) -> None:
-        self.init_keyring()
-        self.populate_keyring()
+        # self.init_keyring()
+        # self.populate_keyring()
+
+        self.fix_limine()
 
         # --- Microcode ---
-        self.handle_ucode()
+        # self.handle_ucode()
 
         # Kill gpg-agent
-        self.terminate('gpg-agent')
+        # self.terminate('gpg-agent')
 
         # Mark orphan packages
-        self.mark_orphans_as_explicit()
+        # self.mark_orphans_as_explicit()
 
         # --- Snapper config ---
         if self.is_btrfs_root():

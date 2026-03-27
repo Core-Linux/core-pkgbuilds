@@ -1,0 +1,22 @@
+# Maintainer: m4teo.dev <m4teo.dev@gmail.com>
+
+pkgname=calamares-config
+_destname1="/etc"
+pkgver=2.1
+pkgrel=3
+pkgdesc="calamares config for archlinux plasma"
+arch=('any')
+url="https://github.com/eososlinux/calamares-config.git"
+license=('GPL3')
+makedepends=('git')
+depends=()
+provides=("${pkgname}")
+options=(!strip !emptydirs)
+
+source=("${pkgname}::git+${url}")
+sha256sums=('SKIP')
+
+package() {
+  install -dm755 ${pkgdir}${_destname1}
+  cp -r ${srcdir}/${pkgname}${_destname1}/* ${pkgdir}${_destname1}
+}

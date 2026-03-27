@@ -1,19 +1,19 @@
-# Maintainer: Nekoh
+# Maintainer: m4teo.dev
 
-pkgname=eosos-snapper-support
+pkgname=core-snapper-support
 pkgver=1.0.2
 pkgrel=1
-pkgdesc='EosOS package that handles snapper configs.'
+pkgdesc='Core package that handles snapper configs.'
 arch=(any)
-url='https://github.com/sourcecorearch/core-pkgbuilds/eosos-snapper'
+url='https://github.com/sourcecorearch/core-pkgbuilds/core-snapper'
 license=(GPL-3.0-or-later)
 depends=(snapper snap-pac)
 makedepends=(git)
 conflicts=(timeshift)
-source=('snapper-template-root-eosos')
+source=('snapper-template-root-core')
 sha512sums=('44b2027a7e772fbe5f499d1a387d68ec873747774b89b0dfd0967a9bb5b4991c917e2be341da123b7c40c712c15dc8e02f2172a83155ec40ed866e8ae4e0027a')
 install="$pkgname".install
 
 package() {
-  install -Dm644 snapper-template-root-eosos "$pkgdir/etc/snapper/config-templates/eosos-root"
+  install -Dm644 snapper-template-root-core "$pkgdir/etc/snapper/config-templates/core-root"
 }

@@ -1,0 +1,15 @@
+pkgbase = calamares-config
+	pkgdesc = calamares config for archlinux plasma
+	pkgver = 2.1
+	pkgrel = 3
+	url = https://github.com/eososlinux/calamares-config.git
+	arch = any
+	license = GPL3
+	makedepends = git
+	provides = calamares-config
+	options = !strip
+	options = !emptydirs
+	source = calamares-config::git+https://github.com/eososlinux/calamares-config.git
+	sha256sums = SKIP
+
+pkgname = calamares-config

@@ -1,16 +1,16 @@
-pkgbase = eosos-snapper-support
-	pkgdesc = EosOS package that handles snapper configs.
+pkgbase = core-snapper-support
+	pkgdesc = Core package that handles snapper configs.
 	pkgver = 1.0.2
 	pkgrel = 1
-	url = https://github.com/sourcecorearch/core-pkgbuilds/eosos-snapper
-	install = eosos-snapper-support.install
+	url = https://github.com/sourcecorearch/core-pkgbuilds/core-snapper
+	install = core-snapper-support.install
 	arch = any
 	license = GPL-3.0-or-later
 	makedepends = git
 	depends = snapper
 	depends = snap-pac
 	conflicts = timeshift
-	source = eosos-template-root-cachyos
+	source = snapper-template-root-core
 	sha512sums = 44b2027a7e772fbe5f499d1a387d68ec873747774b89b0dfd0967a9bb5b4991c917e2be341da123b7c40c712c15dc8e02f2172a83155ec40ed866e8ae4e0027a
 
-pkgname = eosos-snapper-support
+pkgname = core-snapper-support
