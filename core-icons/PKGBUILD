@@ -3,7 +3,7 @@
 pkgname=core-icons
 pkgdesc="Base icons for Core Linux"
 pkgver=r9.7e9cf3d
-pkgrel=3
+pkgrel=2
 arch=('any')
 url="https://github.com/Core-Linux/core-icons"
 license=('GPL')
