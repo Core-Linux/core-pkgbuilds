@@ -2,24 +2,24 @@
 
 pkgname=core-icons
 pkgdesc="Base icons for Core Linux"
-pkgver=r8.278d744
-pkgrel=1
+pkgver=r9.7e9cf3d
+pkgrel=3
 arch=('any')
 url="https://github.com/Core-Linux/core-icons"
 license=('GPL')
 makedepends=('git')
 depends=('hicolor-icon-theme')
-source=("$pkgname::git+$url.git")
+
+source=("core-icons::git+https://github.com/Core-Linux/core-icons.git")
 sha256sums=('SKIP')
 
 pkgver() {
-  cd "$srcdir/$pkgname" || exit
+  cd "$srcdir/core-icons"
   printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
 }
 
 package() {
-
-  install -m644 \
-    "$srcdir/$pkgname/usr/share/icons/corelinux.png" \
+  install -Dm644 \
+    "$srcdir/core-icons/usr/share/icons/corelinux.png" \
     "$pkgdir/usr/share/icons/corelinux.png"
 }
